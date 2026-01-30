@@ -1,4 +1,5 @@
 from collections import deque
+from pathlib import Path
 
 def read_input(filename):
     with open(filename, 'r') as file:
@@ -81,14 +82,78 @@ def matching_engine(n, hospital_prefs, student_prefs):
 
     return res
 
+def verifier(n, final_pairs, hospital_preferences, student_preferences):
+    
+    # Used to check if each student and hospital is uniquely represented in the final pairs
+    unique_students = set()
+    unique_hospitals = set()
+
+    # Stores the pairs as lookups to quickly find what applicant/hospital is a given index matched to
+    hospital_to_student = {}
+    student_to_hospital = {}
+
+    # Stores the ranks of each pair of hospital/applicant
+    hospital_ranks = [[n for _ in range(n)] for _ in range(n)]
+    student_ranks = [[n for _ in range(n)] for _ in range(n)]
+
+    # Checks Validity
+    for hospital, student in final_pairs:
+        unique_hospitals.add(hospital)
+        unique_students.add(student)
+
+        hospital_to_student[hospital] = student
+        student_to_hospital[student] = hospital
+    
+    # Make sure we only have n pairs and each hospital/applicant is used once
+    if len(final_pairs) != n:
+        print("INVALID there are not n pairs")
+        return
+
+    if len(unique_hospitals) != n or len(unique_students) != n:
+        print("INVALID every hospital and student is not uniquely used")
+        return
+
+    # Format the data into easy lookups to check the rank of a given hospital and student
+    for i, (hospitals, students) in enumerate(zip(hospital_preferences, student_preferences)):
+        for rank, (s_j, h_j) in enumerate(zip(hospitals, students)):
+            hospital_ranks[i][s_j - 1] = rank
+            student_ranks[i][h_j - 1] = rank
+
+    # Checks Stability
+    for hospital_idx in range(1, n+1):
+        for student_idx in range(1, n+1):
+
+            # If already matched we ignore
+            if hospital_to_student[hospital_idx] == student_idx:
+                continue
+            
+            # Get the ranks of what the hospital ranked this specific student and vice versa
+            hospital_rank_of_student = hospital_ranks[hospital_idx - 1][student_idx - 1]
+            student_rank_of_hospital = student_ranks[student_idx -1][hospital_idx - 1]
+
+            # Get the ranks of what G-S came up with
+            hospitals_match_rank = hospital_ranks[hospital_idx - 1][hospital_to_student[hospital_idx] - 1]
+            student_match_rank = student_ranks[student_idx - 1][student_to_hospital[student_idx] - 1]
+
+            # If they ranked each other higher than what they are currently matched with, we have an unstable solution
+            if hospital_rank_of_student < hospitals_match_rank and student_rank_of_hospital < student_match_rank:
+                print("UNSTABLE blocking pair: (" + str(hospital_idx) + ", " + str(student_idx) + ")")
+                return
+    
+    print("VALID STABLE")
+    return
+
 def main():
-    n, hospital_prefs, student_prefs = read_input("tests/test1.in")
+    base_dir = Path(__file__).resolve().parent.parent
+    input_file_path = base_dir / "tests/test1.in"
+
+    n, hospital_prefs, student_prefs = read_input(input_file_path)
 
     hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
 
     print(hospital_pairs)
 
-
+    verifier(n, hospital_pairs, hospital_prefs, student_prefs)
 
 if __name__ == "__main__":
     main()
