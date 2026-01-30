@@ -28,12 +28,25 @@ def read_input(filename):
 
     return n, hospital_prefs, student_prefs
 
-def write_output(filename, final_pairs):
+def read_pair_input(n, filename):
+    hospital_pairs = []
+    with open(filename, "r") as file:
+        for _ in range(n):
+            current_line = file.readline()
+            hospital_pairs.append((int(current_line[0]), int(current_line[2])))
+    
+    return hospital_pairs
+
+def write_matching_output(filename, final_pairs):
     with open(filename, "w") as file:
         for hospital_idx, student_idx in final_pairs:
             file.write(str(hospital_idx) + " " + str(student_idx) + "\n")
 
     return
+
+def write_verifier_output(filename, message):
+    with open(filename, "w") as file:
+        file.write(message)
 
 def matching_engine(n, hospital_prefs, student_prefs):
     # change perference list input from 1-indexed to 0-indexed
@@ -114,12 +127,10 @@ def verifier(n, final_pairs, hospital_preferences, student_preferences):
     
     # Make sure we only have n pairs and each hospital/applicant is used once
     if len(final_pairs) != n:
-        print("INVALID there are not n pairs")
-        return
+        return "INVALID there are not n pairs"
 
     if len(unique_hospitals) != n or len(unique_students) != n:
-        print("INVALID every hospital and student is not uniquely used")
-        return
+        return "INVALID every hospital and student is not uniquely used"
 
     # Format the data into easy lookups to check the rank of a given hospital and student
     for i, (hospitals, students) in enumerate(zip(hospital_preferences, student_preferences)):
@@ -145,11 +156,9 @@ def verifier(n, final_pairs, hospital_preferences, student_preferences):
 
             # If they ranked each other higher than what they are currently matched with, we have an unstable solution
             if hospital_rank_of_student < hospitals_match_rank and student_rank_of_hospital < student_match_rank:
-                print("UNSTABLE blocking pair: (" + str(hospital_idx) + ", " + str(student_idx) + ")")
-                return
+                return "UNSTABLE blocking pair: (" + str(hospital_idx) + ", " + str(student_idx) + ")"
     
-    print("VALID STABLE")
-    return
+    return "VALID STABLE"
 
 def generate_preference_lists(n):
     hospital_preferences = []
@@ -196,21 +205,22 @@ def measure_runtime(output_file):
 def main():
 
     base_dir = Path(__file__).resolve().parent.parent
-    input_file_path = base_dir / "tests/test3.in"
-    output_file_path = base_dir / "tests/test3.out"
-    
-    measuring_time_path = base_dir / "data/matching_engine_times.out"
+    input_file_path = base_dir / "data/input.in"
+    output_file_path = base_dir / "data/output.out"
+    verifier_file_path = base_dir / "data/verifier.out"
 
-    n, hospital_prefs, student_prefs = read_input(input_file_path)
+    print("Welcome to the Matching Engine and Verifier!\n")
+    user_choice = input("Which mode would you like to run? [matcher/verifier] ")
 
-    hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
-
-    print(hospital_pairs)
-    write_output(output_file_path, hospital_pairs)
-
-    verifier(n, hospital_pairs, hospital_prefs, student_prefs)
-
-    measure_runtime(measuring_time_path)
+    if user_choice.lower() == "matcher":
+        n, hospital_prefs, student_prefs = read_input(input_file_path)
+        hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
+        write_matching_output(output_file_path, hospital_pairs)
+    elif user_choice.lower() == "verifier":
+        n, hospital_prefs, student_prefs = read_input(input_file_path)
+        hospital_pairs = read_pair_input(n, output_file_path)
+        verifier_message = verifier(n, hospital_pairs, hospital_prefs, student_prefs)
+        write_verifier_output(verifier_file_path, verifier_message)
 
 if __name__ == "__main__":
     main()
