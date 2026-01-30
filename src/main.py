@@ -26,6 +26,12 @@ def read_input(filename):
 
     return n, hospital_prefs, student_prefs
 
+def write_output(filename, final_pairs):
+    with open(filename, "w") as file:
+        for hospital_idx, student_idx in final_pairs:
+            file.write(str(hospital_idx) + " " + str(student_idx) + "\n")
+
+    return
 
 def matching_engine(n, hospital_prefs, student_prefs):
     # change perference list input from 1-indexed to 0-indexed
@@ -146,12 +152,14 @@ def verifier(n, final_pairs, hospital_preferences, student_preferences):
 def main():
     base_dir = Path(__file__).resolve().parent.parent
     input_file_path = base_dir / "tests/test1.in"
+    output_file_path = base_dir / "tests/test1.out"
 
     n, hospital_prefs, student_prefs = read_input(input_file_path)
 
     hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
 
     print(hospital_pairs)
+    write_output(output_file_path, hospital_pairs)
 
     verifier(n, hospital_pairs, hospital_prefs, student_prefs)
 
