@@ -1,5 +1,7 @@
 from collections import deque
 from pathlib import Path
+import random
+import time
 
 def read_input(filename):
     with open(filename, 'r') as file:
@@ -149,10 +151,55 @@ def verifier(n, final_pairs, hospital_preferences, student_preferences):
     print("VALID STABLE")
     return
 
+def generate_preference_lists(n):
+    hospital_preferences = []
+    student_preferences = []
+    for idx in range(2*n):
+        pref_list = list(range(1, n + 1))
+        random.shuffle(pref_list)
+
+        if idx < n:
+            hospital_preferences.append(pref_list)
+        else:
+            student_preferences.append(pref_list)
+    
+    return hospital_preferences, student_preferences
+
+def run_trial(n):
+
+    # Conducting 10 experiments per n to reduce any noise we get from randomly generating the input
+    avg_time = 0
+    for _ in range(10):
+        
+        # First generate input
+        hospital_prefs, student_prefs = generate_preference_lists(n)
+
+        start_time = time.perf_counter()
+        hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
+        end_time = time.perf_counter()
+
+        avg_time += (end_time - start_time)
+
+    return avg_time / 10.0
+
+def measure_runtime(output_file):
+
+    with open(output_file, "w") as file:
+        file.write("N   Average Time\n")
+
+        n = 1
+        while n <= 512:
+            avg_time = run_trial(n)
+            file.write(str(n) + "   " + str(avg_time) + "\n")
+            n *= 2
+
 def main():
+
     base_dir = Path(__file__).resolve().parent.parent
-    input_file_path = base_dir / "tests/test1.in"
-    output_file_path = base_dir / "tests/test1.out"
+    input_file_path = base_dir / "tests/test3.in"
+    output_file_path = base_dir / "tests/test3.out"
+    
+    measuring_time_path = base_dir / "data/matching_engine_times.out"
 
     n, hospital_prefs, student_prefs = read_input(input_file_path)
 
@@ -162,6 +209,8 @@ def main():
     write_output(output_file_path, hospital_pairs)
 
     verifier(n, hospital_pairs, hospital_prefs, student_prefs)
+
+    measure_runtime(measuring_time_path)
 
 if __name__ == "__main__":
     main()
