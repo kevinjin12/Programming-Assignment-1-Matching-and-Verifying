@@ -191,14 +191,36 @@ def run_trial(n):
 
     return avg_time / 10.0
 
-def measure_runtime(output_file):
+def run_verifier_trial(n):
+
+    avg_time = 0
+    for _ in range(10):
+
+        # Generate input
+        hospital_prefs, student_prefs = generate_preference_lists(n)
+        hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
+
+        start_time = time.perf_counter()
+        verifier(n, hospital_pairs, hospital_prefs, student_prefs)
+        end_time = time.perf_counter()
+
+        avg_time += (end_time - start_time)
+    
+    return avg_time / 10.0
+
+def measure_runtime(output_file, is_verifier):
 
     with open(output_file, "w") as file:
         file.write("N   Average Time\n")
 
         n = 1
         while n <= 512:
-            avg_time = run_trial(n)
+
+            if not is_verifier:
+                avg_time = run_trial(n)
+            else:
+                avg_time = run_verifier_trial(n)
+
             file.write(str(n) + "   " + str(avg_time) + "\n")
             n *= 2
 
@@ -209,6 +231,9 @@ def main():
     output_file_path = base_dir / "data/output.out"
     verifier_file_path = base_dir / "data/verifier.out"
 
+    # measure_runtime(base_dir/"data/Measuring Runtime/verifier_times.out", True)
+    # measure_runtime(base_dir/"data/Measuring Runtime/matching_engine_times.out", False)
+    
     print("Welcome to the Matching Engine and Verifier!\n")
     user_choice = input("Which mode would you like to run? [matcher/verifier] ")
 
