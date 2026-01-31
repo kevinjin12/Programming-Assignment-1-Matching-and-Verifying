@@ -240,11 +240,18 @@ def main():
         n, hospital_prefs, student_prefs = read_input(input_file_path)
         hospital_pairs = matching_engine(n, hospital_prefs, student_prefs)
         write_matching_output(output_file_path, hospital_pairs)
+        
+        print("\nFinal Pairings:")
+        for h, s in hospital_pairs:
+            print(str(h) + " " + str(s))
+
     elif user_choice.lower() == "verifier":
         n, hospital_prefs, student_prefs = read_input(input_file_path)
         hospital_pairs = read_pair_input(n, output_file_path)
         verifier_message = verifier(n, hospital_pairs, hospital_prefs, student_prefs)
         write_verifier_output(verifier_file_path, verifier_message)
+
+        print("\nVerification Status:", verifier_message)
 
 if __name__ == "__main__":
     main()
