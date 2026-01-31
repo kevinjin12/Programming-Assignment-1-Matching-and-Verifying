@@ -32,9 +32,8 @@ def read_pair_input(n, filename):
     hospital_pairs = []
     with open(filename, "r") as file:
         for _ in range(n):
-            current_line = file.readline()
-            hospital_pairs.append((int(current_line[0]), int(current_line[2])))
-    
+            current_line = file.readline().split()
+            hospital_pairs.append((int(current_line[0]), int(current_line[1])))
     return hospital_pairs
 
 def write_matching_output(filename, final_pairs):
