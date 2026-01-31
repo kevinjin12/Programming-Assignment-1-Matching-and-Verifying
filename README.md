@@ -38,8 +38,8 @@ The output of this mode will be piped to verifier.out. It will be "VALID STABLE"
 ## Scalability
 For the matching engine, we see that runtime scales quadratically with input size. This makes sense and matches theoretical results. The graph is displayed below.
 
-![Matching Engine]("data\runtime_graph.png")
+![Matching Engine](data/runtime_graph.png)
 
 Similarly, the verification also takes quadratic time to run with respect to input size. The graph is displayed below.
 
-![Verifier]("data\verifier_graph.png")
+![Verifier](data/verifier_graph.png)
